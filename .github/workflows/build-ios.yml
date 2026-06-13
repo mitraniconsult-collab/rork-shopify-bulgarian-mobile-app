@@ -9,8 +9,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Select Xcode 16.2
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Install iOS Simulator runtime
+        run: |
+          xcodebuild -downloadPlatform iOS -quiet || true
+
       - name: Build for simulator
         run: |
           xcodebuild \
@@ -23,6 +29,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             SWIFT_SUPPRESS_WARNINGS=YES \
             build
+
       - name: Package .app for Appetize
         run: |
           APP_PATH=$(find build/Build/Products -name "*.app" -not -path "*/Tests*" | head -1)
@@ -33,6 +40,7 @@ jobs:
           zip -r "$GITHUB_WORKSPACE/HomeSector.zip" *.app
           echo "Zip contents:"
           unzip -l "$GITHUB_WORKSPACE/HomeSector.zip" | head -5
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
