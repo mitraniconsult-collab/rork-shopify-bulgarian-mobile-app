@@ -128,7 +128,7 @@ struct HomeView: View {
 
     private var allProductsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Всички продукти")
+            Text("Топ продукти")
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(HomeSectorDesign.Colors.primaryText)
                 .padding(.horizontal, HomeSectorDesign.Layout.horizontalPadding)

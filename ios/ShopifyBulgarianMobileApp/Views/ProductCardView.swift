@@ -52,6 +52,11 @@ struct ProductCardView: View {
         .background(HomeSectorDesign.Colors.background)
         .clipShape(.rect(cornerRadius: 12))
         .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(HomeSectorDesign.Colors.border)
+                .frame(height: 1)
+        }
     }
 
     private var productImage: some View {

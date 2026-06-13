@@ -33,6 +33,7 @@ struct ContentView: View {
                 SplashView(isActive: $showSplash)
             }
         }
+        .preferredColorScheme(.light)
         .onAppear {
             configureTabBarAppearance()
         }
@@ -62,7 +63,7 @@ struct ContentView: View {
                 )
             }
         }
-        .tint(HomeSectorDesign.Colors.accent)
+        .tint(Color(red: 0.102, green: 0.102, blue: 0.102))
     }
 
     private func configureTabBarAppearance() {
@@ -77,13 +78,13 @@ struct ContentView: View {
         ]
         let selectedAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 10, weight: .regular),
-            .foregroundColor: UIColor(HomeSectorDesign.Colors.accent)
+            .foregroundColor: UIColor(Color(red: 0.102, green: 0.102, blue: 0.102))
         ]
 
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = normalAttributes
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = selectedAttributes
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor(HomeSectorDesign.Colors.tabBarInactive)
-        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(HomeSectorDesign.Colors.accent)
+        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color(red: 0.102, green: 0.102, blue: 0.102))
 
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
