@@ -16,18 +16,20 @@ jobs:
       - name: Select Xcode 16.2
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
+      - name: Show available schemes
+        run: |
+          xcodebuild -project ios/ShopifyBulgarianMobileApp.xcodeproj -list
+
       - name: Build for simulator
         run: |
           xcodebuild \
             -project ios/ShopifyBulgarianMobileApp.xcodeproj \
             -scheme ShopifyBulgarianMobileApp \
             -configuration Debug \
-            -sdk iphonesimulator \
-            -arch x86_64 \
+            -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            IPHONEOS_DEPLOYMENT_TARGET=18.0 \
             SWIFT_SUPPRESS_WARNINGS=YES \
             build
 
@@ -39,8 +41,8 @@ jobs:
           cp -r "$APP_PATH" /tmp/appetize/
           cd /tmp/appetize
           zip -r "$GITHUB_WORKSPACE/HomeSector.zip" *.app
-          echo "Zip contents (first 10 lines):"
-          unzip -l "$GITHUB_WORKSPACE/HomeSector.zip" | head -10
+          echo "Zip contents:"
+          unzip -l "$GITHUB_WORKSPACE/HomeSector.zip" | head -5
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
