@@ -16,6 +16,13 @@ jobs:
       - name: Select Xcode 16.2
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
+      - name: Resolve packages first
+        run: |
+          xcodebuild \
+            -project ios/ShopifyBulgarianMobileApp.xcodeproj \
+            -resolvePackageDependencies \
+            -derivedDataPath build
+
       - name: Build for simulator
         run: |
           xcodebuild \
@@ -23,32 +30,24 @@ jobs:
             -scheme ShopifyBulgarianMobileApp \
             -configuration Debug \
             -sdk iphonesimulator \
+            -arch x86_64 \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            ONLY_ACTIVE_ARCH=NO \
-            IPHONEOS_DEPLOYMENT_TARGET=17.0 \
+            IPHONEOS_DEPLOYMENT_TARGET=18.0 \
+            SWIFT_SUPPRESS_WARNINGS=YES \
             build
 
       - name: Package .app for Appetize
         run: |
-          # Find the .app bundle
           APP_PATH=$(find build/Build/Products -name "*.app" -not -path "*/Tests*" | head -1)
           echo "Found app at: $APP_PATH"
-          
-          # Create a clean temp directory
-          mkdir -p /tmp/appetize_upload
-          
-          # Copy .app directly into temp dir (no subdirectories)
-          cp -r "$APP_PATH" /tmp/appetize_upload/
-          
-          # Zip from inside the temp dir so .app is at root of zip
-          cd /tmp/appetize_upload
+          mkdir -p /tmp/appetize
+          cp -r "$APP_PATH" /tmp/appetize/
+          cd /tmp/appetize
           zip -r "$GITHUB_WORKSPACE/HomeSector.zip" *.app
-          
-          # Verify structure
-          echo "Zip contents:"
-          unzip -l "$GITHUB_WORKSPACE/HomeSector.zip" | head -20
+          echo "Zip contents (first 10 lines):"
+          unzip -l "$GITHUB_WORKSPACE/HomeSector.zip" | head -10
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
