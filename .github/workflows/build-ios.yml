@@ -22,10 +22,11 @@ jobs:
             -project ios/ShopifyBulgarianMobileApp.xcodeproj \
             -scheme ShopifyBulgarianMobileApp \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
+            -sdk iphonesimulator \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO \
             build
 
       - name: Find and zip .app
