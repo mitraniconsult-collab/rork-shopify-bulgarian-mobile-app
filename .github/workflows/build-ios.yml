@@ -28,30 +28,27 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=NO \
             IPHONEOS_DEPLOYMENT_TARGET=17.0 \
-            OTHER_SWIFT_FLAGS="-suppress-warnings" \
-            build 2>&1 | grep -E "error:|warning:|Build succeeded|BUILD FAILED|FAILED" | tail -50
+            build
 
-      - name: Full build output on failure
-        if: failure()
+      - name: Package .app for Appetize
         run: |
-          xcodebuild \
-            -project ios/ShopifyBulgarianMobileApp.xcodeproj \
-            -scheme ShopifyBulgarianMobileApp \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -derivedDataPath build2 \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            ONLY_ACTIVE_ARCH=NO \
-            IPHONEOS_DEPLOYMENT_TARGET=17.0 \
-            build 2>&1 | grep -E "error:" | head -30
-
-      - name: Find and zip .app
-        run: |
-          APP_PATH=$(find build -name "*.app" -not -path "*/Tests*" | head -1)
+          # Find the .app bundle
+          APP_PATH=$(find build/Build/Products -name "*.app" -not -path "*/Tests*" | head -1)
           echo "Found app at: $APP_PATH"
-          cd "$(dirname "$APP_PATH")"
-          zip -r "$GITHUB_WORKSPACE/HomeSector.zip" "$(basename "$APP_PATH")"
+          
+          # Create a clean temp directory
+          mkdir -p /tmp/appetize_upload
+          
+          # Copy .app directly into temp dir (no subdirectories)
+          cp -r "$APP_PATH" /tmp/appetize_upload/
+          
+          # Zip from inside the temp dir so .app is at root of zip
+          cd /tmp/appetize_upload
+          zip -r "$GITHUB_WORKSPACE/HomeSector.zip" *.app
+          
+          # Verify structure
+          echo "Zip contents:"
+          unzip -l "$GITHUB_WORKSPACE/HomeSector.zip" | head -20
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
