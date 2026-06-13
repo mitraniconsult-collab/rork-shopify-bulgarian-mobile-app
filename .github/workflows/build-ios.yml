@@ -27,7 +27,24 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=NO \
-            build
+            IPHONEOS_DEPLOYMENT_TARGET=17.0 \
+            OTHER_SWIFT_FLAGS="-suppress-warnings" \
+            build 2>&1 | grep -E "error:|warning:|Build succeeded|BUILD FAILED|FAILED" | tail -50
+
+      - name: Full build output on failure
+        if: failure()
+        run: |
+          xcodebuild \
+            -project ios/ShopifyBulgarianMobileApp.xcodeproj \
+            -scheme ShopifyBulgarianMobileApp \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build2 \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO \
+            IPHONEOS_DEPLOYMENT_TARGET=17.0 \
+            build 2>&1 | grep -E "error:" | head -30
 
       - name: Find and zip .app
         run: |
@@ -42,4 +59,3 @@ jobs:
           name: HomeSector-Simulator
           path: HomeSector.zip
           retention-days: 7
-
