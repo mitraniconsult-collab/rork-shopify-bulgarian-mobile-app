@@ -1,0 +1,35 @@
+name: Build iOS Simulator App
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Build for simulator
+        run: |
+          xcodebuild \
+            -project ios/ShopifyBulgarianMobileApp.xcodeproj \
+            -scheme ShopifyBulgarianMobileApp \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Find and zip .app
+        run: |
+          APP_PATH=$(find build -name "*.app" -not -path "*/Tests*" | head -1)
+          echo "Found app at: $APP_PATH"
+          cd "$(dirname "$APP_PATH")"
+          zip
