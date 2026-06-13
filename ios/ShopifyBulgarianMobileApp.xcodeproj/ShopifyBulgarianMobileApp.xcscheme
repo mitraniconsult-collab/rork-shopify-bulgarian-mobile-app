@@ -4,7 +4,8 @@
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">
+      buildImplicitDependencies = "YES"
+      buildArchitectures = "Automatic">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -14,7 +15,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "105FC57C2E9EAD3100EA8BCF"
+               BlueprintIdentifier = "105FC5792E9EAD3100EA8BCF"
                BuildableName = "ShopifyBulgarianMobileApp.app"
                BlueprintName = "ShopifyBulgarianMobileApp"
                ReferencedContainer = "container:ShopifyBulgarianMobileApp.xcodeproj">
@@ -44,7 +45,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "105FC57C2E9EAD3100EA8BCF"
+            BlueprintIdentifier = "105FC5792E9EAD3100EA8BCF"
             BuildableName = "ShopifyBulgarianMobileApp.app"
             BlueprintName = "ShopifyBulgarianMobileApp"
             ReferencedContainer = "container:ShopifyBulgarianMobileApp.xcodeproj">
@@ -61,7 +62,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "105FC57C2E9EAD3100EA8BCF"
+            BlueprintIdentifier = "105FC5792E9EAD3100EA8BCF"
             BuildableName = "ShopifyBulgarianMobileApp.app"
             BlueprintName = "ShopifyBulgarianMobileApp"
             ReferencedContainer = "container:ShopifyBulgarianMobileApp.xcodeproj">
