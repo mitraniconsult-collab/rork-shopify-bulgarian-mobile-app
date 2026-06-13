@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated final class ShopifyService: Sendable {
+ final class ShopifyService: Sendable {
     static let shared = ShopifyService()
 
     private init() {}
@@ -564,7 +564,7 @@ nonisolated final class ShopifyService: Sendable {
     }
 }
 
-nonisolated enum ShopifyError: Error, LocalizedError, Sendable {
+ enum ShopifyError: Error, LocalizedError, Sendable {
     case networkError
     case graphQLError(String)
     case noData
