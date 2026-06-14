@@ -28,10 +28,8 @@ struct ProductCardView: View {
     }
 
     private var isNew: Bool {
-        guard let createdAt = product.createdAt,
-              let date = ISO8601DateFormatter().date(from: createdAt) else { return false }
-        return Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 999 < 30
-    }
+    return false
+}
 
     private var mockRating: Double {
         let hash = abs(product.id.hashValue)
@@ -64,7 +62,7 @@ struct ProductCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     if let pct = discountPercent {
                         badgeView("-\(pct)%", color: Color.red)
-                    } else if isNew {
+                    } else if  {
                         badgeView("НОВО", color: Color(hex: "#FF6000"))
                     }
                 }
