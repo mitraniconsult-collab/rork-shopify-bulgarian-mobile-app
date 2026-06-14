@@ -1,75 +1,75 @@
 import Foundation
 
- struct GraphQLResponse<T: Decodable & Sendable>: Decodable, Sendable {
+nonisolated struct GraphQLResponse<T: Decodable & Sendable>: Decodable, Sendable {
     let data: T?
     let errors: [GraphQLError]?
 }
 
- struct GraphQLError: Decodable, Sendable {
+nonisolated struct GraphQLError: Decodable, Sendable {
     let message: String
 }
 
- struct ProductsData: Decodable, Sendable {
+nonisolated struct ProductsData: Decodable, Sendable {
     let products: Connection<ShopifyProduct>
 }
 
- struct CollectionsData: Decodable, Sendable {
+nonisolated struct CollectionsData: Decodable, Sendable {
     let collections: Connection<ShopifyCollection>
 }
 
- struct CollectionByHandleData: Decodable, Sendable {
+nonisolated struct CollectionByHandleData: Decodable, Sendable {
     let collection: ShopifyCollection?
 }
 
- struct CartCreateData: Decodable, Sendable {
+nonisolated struct CartCreateData: Decodable, Sendable {
     let cartCreate: CartCreatePayload
 }
 
- struct CartCreatePayload: Decodable, Sendable {
+nonisolated struct CartCreatePayload: Decodable, Sendable {
     let cart: ShopifyCart?
     let userErrors: [CartUserError]?
 }
 
- struct CartLinesAddData: Decodable, Sendable {
+nonisolated struct CartLinesAddData: Decodable, Sendable {
     let cartLinesAdd: CartLinesPayload
 }
 
- struct CartLinesRemoveData: Decodable, Sendable {
+nonisolated struct CartLinesRemoveData: Decodable, Sendable {
     let cartLinesRemove: CartLinesPayload
 }
 
- struct CartLinesUpdateData: Decodable, Sendable {
+nonisolated struct CartLinesUpdateData: Decodable, Sendable {
     let cartLinesUpdate: CartLinesPayload
 }
 
- struct CartLinesPayload: Decodable, Sendable {
+nonisolated struct CartLinesPayload: Decodable, Sendable {
     let cart: ShopifyCart?
     let userErrors: [CartUserError]?
 }
 
- struct CartUserError: Decodable, Sendable {
+nonisolated struct CartUserError: Decodable, Sendable {
     let field: [String]?
     let message: String
 }
 
- struct Connection<T: Decodable & Sendable>: Decodable, Sendable {
+nonisolated struct Connection<T: Decodable & Sendable>: Decodable, Sendable {
     let edges: [Edge<T>]
     let pageInfo: PageInfo?
 }
 
- struct Edge<T: Decodable & Sendable>: Decodable, Sendable {
+nonisolated struct Edge<T: Decodable & Sendable>: Decodable, Sendable {
     let node: T
     let cursor: String?
 }
 
- struct PageInfo: Decodable, Sendable {
+nonisolated struct PageInfo: Decodable, Sendable {
     let hasNextPage: Bool?
     let hasPreviousPage: Bool?
 }
 
 // MARK: - Shopify Product
 
- struct ShopifyProduct: Decodable, Sendable, Identifiable {
+nonisolated struct ShopifyProduct: Decodable, Sendable, Identifiable {
     let id: String
     let title: String
     let handle: String
@@ -93,7 +93,7 @@ import Foundation
 
 // MARK: - Shopify Image
 
- struct ShopifyImage: Decodable, Sendable {
+nonisolated struct ShopifyImage: Decodable, Sendable {
     let url: String?
     let altText: String?
 
@@ -105,7 +105,7 @@ import Foundation
 
 // MARK: - Shopify Variant
 
- struct ShopifyVariant: Decodable, Sendable, Identifiable {
+nonisolated struct ShopifyVariant: Decodable, Sendable, Identifiable {
     let id: String
     let title: String
     let price: MoneyV2?
@@ -119,14 +119,14 @@ import Foundation
     var safeCompareAtPrice: MoneyV2? { compareAtPrice }
 }
 
- struct SelectedOption: Decodable, Sendable {
+nonisolated struct SelectedOption: Decodable, Sendable {
     let name: String?
     let value: String?
 }
 
 // MARK: - Money
 
- struct MoneyV2: Decodable, Sendable {
+nonisolated struct MoneyV2: Decodable, Sendable {
     let amount: String?
     let currencyCode: String?
 
@@ -147,7 +147,7 @@ import Foundation
 
 // MARK: - Price Range
 
- struct PriceRange: Decodable, Sendable {
+nonisolated struct PriceRange: Decodable, Sendable {
     let minVariantPrice: MoneyV2?
     let maxVariantPrice: MoneyV2?
 
@@ -157,7 +157,7 @@ import Foundation
 
 // MARK: - Shopify Collection
 
- struct ShopifyCollection: Decodable, Sendable, Identifiable {
+nonisolated struct ShopifyCollection: Decodable, Sendable, Identifiable {
     let id: String
     let title: String
     let handle: String
@@ -168,7 +168,7 @@ import Foundation
 
 // MARK: - Shopify Cart
 
- struct ShopifyCart: Decodable, Sendable, Identifiable {
+nonisolated struct ShopifyCart: Decodable, Sendable, Identifiable {
     let id: String
     let checkoutUrl: String?
     let lines: Connection<CartLine>?
@@ -182,7 +182,7 @@ import Foundation
     var safeLines: [CartLine] { lines?.edges.map(\.node) ?? [] }
 }
 
- struct CartLine: Decodable, Sendable, Identifiable {
+nonisolated struct CartLine: Decodable, Sendable, Identifiable {
     let id: String
     let quantity: Int?
     let merchandise: CartMerchandise?
@@ -191,7 +191,7 @@ import Foundation
     var safeQuantity: Int { quantity ?? 0 }
 }
 
- struct CartMerchandise: Decodable, Sendable {
+nonisolated struct CartMerchandise: Decodable, Sendable {
     let id: String
     let title: String
     let product: CartProduct?
@@ -201,18 +201,18 @@ import Foundation
     var safePrice: MoneyV2 { price ?? MoneyV2.default }
 }
 
- struct CartProduct: Decodable, Sendable {
+nonisolated struct CartProduct: Decodable, Sendable {
     let title: String
     let handle: String
 }
 
- struct CartLineCost: Decodable, Sendable {
+nonisolated struct CartLineCost: Decodable, Sendable {
     let totalAmount: MoneyV2?
 
     var safeTotal: MoneyV2 { totalAmount ?? MoneyV2.default }
 }
 
- struct CartCost: Decodable, Sendable {
+nonisolated struct CartCost: Decodable, Sendable {
     let totalAmount: MoneyV2?
     let subtotalAmount: MoneyV2?
     let totalTaxAmount: MoneyV2?
@@ -224,17 +224,17 @@ import Foundation
 
 // MARK: - Fetch
 
- struct CartFetchData: Decodable, Sendable {
+nonisolated struct CartFetchData: Decodable, Sendable {
     let cart: ShopifyCart?
 }
 
- struct ProductByHandleData: Decodable, Sendable {
+nonisolated struct ProductByHandleData: Decodable, Sendable {
     let product: ShopifyProduct?
 }
 
 // MARK: - Predictive Search
 
- struct PredictiveSearchProduct: Decodable, Sendable, Identifiable {
+nonisolated struct PredictiveSearchProduct: Decodable, Sendable, Identifiable {
     let id: String
     let title: String
     let handle: String
@@ -254,20 +254,20 @@ import Foundation
     var safeMinPrice: MoneyV2 { priceRange?.safeMinPrice ?? MoneyV2.default }
 }
 
- struct PredictiveSearchData: Decodable, Sendable {
+nonisolated struct PredictiveSearchData: Decodable, Sendable {
     let predictiveSearch: PredictiveSearchResult?
 }
 
- struct PredictiveSearchResult: Decodable, Sendable {
+nonisolated struct PredictiveSearchResult: Decodable, Sendable {
     let products: [PredictiveSearchProduct]?
 }
 
 // MARK: - Collection Products
 
- struct CollectionProductsData: Decodable, Sendable {
+nonisolated struct CollectionProductsData: Decodable, Sendable {
     let collection: CollectionProductsNode?
 }
 
- struct CollectionProductsNode: Decodable, Sendable {
+nonisolated struct CollectionProductsNode: Decodable, Sendable {
     let products: Connection<ShopifyProduct>
 }
