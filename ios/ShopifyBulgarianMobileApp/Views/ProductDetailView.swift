@@ -9,6 +9,7 @@ struct ProductDetailView: View {
     @State private var isAddingToCart: Bool = false
     @State private var showAddedFeedback: Bool = false
     @State private var isDescriptionExpanded: Bool = false
+    @State private var relatedProducts: [ShopifyProduct] = []
 
     private var images: [ShopifyImage] {
         product.images?.edges.map(\.node) ?? []
@@ -43,6 +44,8 @@ struct ProductDetailView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         productInfo
 
+                        deliveryInfo
+
                         if variants.count > 1 {
                             variantPicker
                         }
@@ -51,12 +54,24 @@ struct ProductDetailView: View {
                             .overlay(HomeSectorDesign.Colors.border)
 
                         descriptionSection
+
+                        Divider()
+                            .overlay(HomeSectorDesign.Colors.border)
+
+                        guaranteeSection
                     }
                     .padding(20)
                     .background(HomeSectorDesign.Colors.background)
+
+                    if !relatedProducts.isEmpty {
+                        relatedProductsSection
+                            .padding(.top, 8)
+                    }
+
+                    Spacer().frame(height: 100)
                 }
             }
-            .background(HomeSectorDesign.Colors.background)
+            .background(Color(.systemGray6))
 
             addToCartButton
         }
@@ -71,6 +86,7 @@ struct ProductDetailView: View {
         }
         .onAppear {
             selectedVariant = product.firstVariant
+            loadRelatedProducts()
         }
         .sensoryFeedback(.success, trigger: showAddedFeedback)
     }
@@ -78,7 +94,7 @@ struct ProductDetailView: View {
     // MARK: - Image Gallery
 
     private var imageGallery: some View {
-        ZStack(alignment: .bottomTrailing) {
+        ZStack(alignment: .bottom) {
             if images.isEmpty {
                 Color(.systemGray6)
                     .aspectRatio(1, contentMode: .fit)
@@ -117,14 +133,17 @@ struct ProductDetailView: View {
             }
 
             if images.count > 1 {
-                Text("\(selectedImageIndex + 1)/\(images.count)")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(.black.opacity(0.5))
-                    .clipShape(.rect(cornerRadius: 12))
-                    .padding(12)
+                HStack(spacing: 6) {
+                    ForEach(0..<images.count, id: \.self) { index in
+                        Circle()
+                            .fill(index == selectedImageIndex ? Color(hex: "#FF6000") : Color.white.opacity(0.6))
+                            .frame(
+                                width: index == selectedImageIndex ? 8 : 6,
+                                height: index == selectedImageIndex ? 8 : 6
+                            )
+                    }
+                }
+                .padding(.bottom, 12)
             }
         }
     }
@@ -139,42 +158,96 @@ struct ProductDetailView: View {
 
             HStack(spacing: 8) {
                 Text(selectedPrice)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(hasSale ? HomeSectorDesign.Colors.saleRed : HomeSectorDesign.Colors.primaryText)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundStyle(hasSale ? Color.red : Color(hex: "#FF6000"))
 
                 if hasSale,
                    let variant = selectedVariant,
                    let compareAt = variant.compareAtPrice {
                     Text(compareAt.formattedAmount)
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundStyle(HomeSectorDesign.Colors.struckGray)
+                        .font(.system(size: 15))
+                        .foregroundStyle(Color(.systemGray))
                         .strikethrough()
 
                     if let compareValue = Double(compareAt.safeAmount),
                        let currentValue = Double(variant.safePrice.safeAmount) {
                         let discount = Int(((compareValue - currentValue) / compareValue) * 100)
                         Text("-\(discount)%")
-                            .font(.system(size: 11, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(HomeSectorDesign.Colors.saleRed)
-                            .clipShape(.rect(cornerRadius: 4))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.red)
+                            .clipShape(.rect(cornerRadius: 6))
                     }
                 }
             }
 
             if let variant = selectedVariant {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Circle()
-                        .fill(variant.safeAvailable ? Color.green : HomeSectorDesign.Colors.saleRed)
-                        .frame(width: 7, height: 7)
+                        .fill(variant.safeAvailable ? Color.green : Color.red)
+                        .frame(width: 8, height: 8)
                     Text(variant.safeAvailable ? "В наличност" : "Изчерпан")
                         .font(.system(size: 13))
-                        .foregroundStyle(variant.safeAvailable ? Color.green : HomeSectorDesign.Colors.saleRed)
+                        .foregroundStyle(variant.safeAvailable ? Color.green : Color.red)
                 }
             }
         }
+    }
+
+    // MARK: - Delivery Info
+
+    private var deliveryInfo: some View {
+        VStack(spacing: 0) {
+            deliveryRow(
+                icon: "shippingbox.fill",
+                iconColor: Color(hex: "#FF6000"),
+                title: "Бърза доставка",
+                subtitle: "1-3 работни дни"
+            )
+            Divider().padding(.leading, 44)
+            deliveryRow(
+                icon: "arrow.uturn.left",
+                iconColor: Color.blue,
+                title: "Лесно връщане",
+                subtitle: "До 14 дни след получаване"
+            )
+            Divider().padding(.leading, 44)
+            deliveryRow(
+                icon: "creditcard.fill",
+                iconColor: Color.green,
+                title: "Сигурно плащане",
+                subtitle: "Карта, наложен платеж"
+            )
+        }
+        .background(Color(.systemGray6))
+        .clipShape(.rect(cornerRadius: 12))
+    }
+
+    private func deliveryRow(
+        icon: String,
+        iconColor: Color,
+        title: String,
+        subtitle: String
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundStyle(iconColor)
+                .frame(width: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(HomeSectorDesign.Colors.primaryText)
+                Text(subtitle)
+                    .font(.system(size: 12))
+                    .foregroundStyle(HomeSectorDesign.Colors.secondaryText)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
     }
 
     // MARK: - Variant Picker
@@ -197,7 +270,7 @@ struct ProductDetailView: View {
                                 .padding(.vertical, 8)
                                 .background(
                                     selectedVariant?.id == variant.id
-                                        ? HomeSectorDesign.Colors.accent
+                                        ? Color(hex: "#FF6000")
                                         : HomeSectorDesign.Colors.background
                                 )
                                 .foregroundStyle(
@@ -209,7 +282,9 @@ struct ProductDetailView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: HomeSectorDesign.Layout.pillCornerRadius)
                                         .stroke(
-                                            selectedVariant?.id == variant.id ? Color.clear : HomeSectorDesign.Colors.border,
+                                            selectedVariant?.id == variant.id
+                                                ? Color.clear
+                                                : HomeSectorDesign.Colors.border,
                                             lineWidth: 1
                                         )
                                 )
@@ -232,7 +307,7 @@ struct ProductDetailView: View {
                     .foregroundStyle(HomeSectorDesign.Colors.primaryText)
 
                 Text(isDescriptionExpanded ? fullStrippedDescription : shortStrippedDescription)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: 14))
                     .foregroundStyle(HomeSectorDesign.Colors.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -244,12 +319,95 @@ struct ProductDetailView: View {
                     } label: {
                         Text(isDescriptionExpanded ? "Скрий" : "Виж повече")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(HomeSectorDesign.Colors.accent)
+                            .foregroundStyle(Color(hex: "#FF6000"))
                     }
                 }
             }
         }
     }
+
+    // MARK: - Guarantee Section
+
+    private var guaranteeSection: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.shield.fill")
+                .font(.system(size: 24))
+                .foregroundStyle(Color(hex: "#FF6000"))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Гаранция за качество")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(HomeSectorDesign.Colors.primaryText)
+                Text("Всички продукти са с гаранция")
+                    .font(.system(size: 12))
+                    .foregroundStyle(HomeSectorDesign.Colors.secondaryText)
+            }
+            Spacer()
+        }
+        .padding(14)
+        .background(Color(hex: "#FFF0E8"))
+        .clipShape(.rect(cornerRadius: 12))
+    }
+
+    // MARK: - Related Products
+
+    private func loadRelatedProducts() {
+        let allProducts = StoreViewModel.shared?.allProducts ?? []
+        relatedProducts = allProducts
+            .filter { $0.id != product.id }
+            .prefix(8)
+            .map { $0 }
+    }
+
+    private var relatedProductsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Подобни продукти")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(HomeSectorDesign.Colors.primaryText)
+                .padding(.horizontal, 16)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(relatedProducts) { related in
+                        NavigationLink(value: related) {
+                            relatedProductCard(related)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+        .padding(.vertical, 16)
+        .background(Color.white)
+    }
+
+    private func relatedProductCard(_ product: ShopifyProduct) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            AsyncImage(url: URL(string: product.images?.edges.first?.node.url ?? "")) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Color(.systemGray5)
+            }
+            .frame(width: 130, height: 130)
+            .clipped()
+            .clipShape(.rect(cornerRadius: 10))
+
+            Text(product.title)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.primary)
+                .lineLimit(2)
+                .frame(width: 130, alignment: .leading)
+
+            if let variant = product.variants?.edges.first?.node {
+                Text("\(variant.price.amount) лв.")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color(hex: "#FF6000"))
+            }
+        }
+        .frame(width: 130)
+    }
+
+    // MARK: - Description Helpers
 
     private var fullStrippedDescription: String {
         product.safeDescription
@@ -261,20 +419,16 @@ struct ProductDetailView: View {
             .replacingOccurrences(of: "&#39;", with: "'")
             .replacingOccurrences(of: "&nbsp;", with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "\n{2,}", with: "\n\n", options: .regularExpression)
     }
 
     private var strippedDescription: String {
-        let full = fullStrippedDescription
-        if isDescriptionExpanded || full.count <= 300 { return full }
-        let endIndex = full.index(full.startIndex, offsetBy: min(300, full.count))
-        return String(full[..<endIndex]) + "..."
+        fullStrippedDescription
     }
 
     private var shortStrippedDescription: String {
         let full = fullStrippedDescription
-        if full.count <= 300 { return full }
-        let endIndex = full.index(full.startIndex, offsetBy: min(300, full.count))
+        guard full.count > 300 else { return full }
+        let endIndex = full.index(full.startIndex, offsetBy: 300)
         return String(full[..<endIndex]) + "..."
     }
 
@@ -286,7 +440,11 @@ struct ProductDetailView: View {
         } label: {
             Image(systemName: cartViewModel.isInWishlist(productId: product.id) ? "heart.fill" : "heart")
                 .font(.system(size: 18))
-                .foregroundStyle(cartViewModel.isInWishlist(productId: product.id) ? HomeSectorDesign.Colors.saleRed : HomeSectorDesign.Colors.primaryText)
+                .foregroundStyle(
+                    cartViewModel.isInWishlist(productId: product.id)
+                        ? Color.red
+                        : HomeSectorDesign.Colors.primaryText
+                )
         }
     }
 
@@ -297,35 +455,53 @@ struct ProductDetailView: View {
             Divider()
                 .overlay(HomeSectorDesign.Colors.border)
 
-            Button {
-                guard let variant = selectedVariant, variant.safeAvailable else { return }
-                isAddingToCart = true
-                Task {
-                    await cartViewModel.addToCart(variantId: variant.id)
-                    isAddingToCart = false
-                    showAddedFeedback.toggle()
+            HStack(spacing: 12) {
+                Button {
+                    cartViewModel.toggleWishlist(product: product)
+                } label: {
+                    Image(systemName: cartViewModel.isInWishlist(productId: product.id) ? "heart.fill" : "heart")
+                        .font(.system(size: 20))
+                        .foregroundStyle(
+                            cartViewModel.isInWishlist(productId: product.id)
+                                ? Color.red
+                                : HomeSectorDesign.Colors.primaryText
+                        )
+                        .frame(width: 52, height: 52)
+                        .background(Color(.systemGray6))
+                        .clipShape(.rect(cornerRadius: 12))
                 }
-            } label: {
-                HStack(spacing: 8) {
-                    if isAddingToCart {
-                        ProgressView()
-                            .tint(.white)
-                    } else {
-                        Text(showAddedFeedback ? "Добавено!" : "Добави в кошницата")
-                            .font(.system(size: 16, weight: .semibold))
+
+                Button {
+                    guard let variant = selectedVariant, variant.safeAvailable else { return }
+                    isAddingToCart = true
+                    Task {
+                        await cartViewModel.addToCart(variantId: variant.id)
+                        isAddingToCart = false
+                        showAddedFeedback.toggle()
                     }
+                } label: {
+                    HStack(spacing: 8) {
+                        if isAddingToCart {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "bag.badge.plus")
+                                .font(.system(size: 16))
+                            Text(showAddedFeedback ? "Добавено!" : "Добави в кошницата")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(
+                        isAvailable && !isAddingToCart
+                            ? Color(hex: "#FF6000")
+                            : Color(.systemGray4)
+                    )
+                    .foregroundStyle(.white)
+                    .clipShape(.rect(cornerRadius: 12))
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(
-                    isAvailable && !isAddingToCart
-                        ? HomeSectorDesign.Colors.accent
-                        : Color(.systemGray4)
-                )
-                .foregroundStyle(.white)
-                .clipShape(.rect(cornerRadius: 12))
+                .disabled(!isAvailable || isAddingToCart)
             }
-            .disabled(!isAvailable || isAddingToCart)
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
