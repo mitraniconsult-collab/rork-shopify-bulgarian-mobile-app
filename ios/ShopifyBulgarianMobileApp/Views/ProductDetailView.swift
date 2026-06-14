@@ -350,6 +350,9 @@ struct ProductDetailView: View {
 
     // MARK: - Related Products
 
+    private func loadRelatedProducts() {
+        relatedProducts = []
+    }
     private func relatedProductCard(_ product: ShopifyProduct) -> some View {
     VStack(alignment: .leading, spacing: 6) {
         AsyncImage(url: product.firstImage?.imageURL) { image in
