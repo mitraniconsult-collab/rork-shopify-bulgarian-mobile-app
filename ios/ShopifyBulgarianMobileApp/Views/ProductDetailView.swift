@@ -399,32 +399,6 @@ struct ProductDetailView: View {
         .background(Color.white)
     }
 
-    private func relatedProductCard(_ product: ShopifyProduct) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            AsyncImage(url: URL(string: product.images?.edges.first?.node.url ?? "")) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Color(.systemGray5)
-            }
-            .frame(width: 130, height: 130)
-            .clipped()
-            .clipShape(.rect(cornerRadius: 10))
-
-            Text(product.title)
-                .font(.system(size: 12))
-                .foregroundStyle(Color.primary)
-                .lineLimit(2)
-                .frame(width: 130, alignment: .leading)
-
-            if let variant = product.variants?.edges.first?.node {
-                Text("\(variant.price.amount) лв.")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(Color(hex: "#FF6000"))
-            }
-        }
-        .frame(width: 130)
-    }
-
     // MARK: - Description Helpers
 
     private var fullStrippedDescription: String {
