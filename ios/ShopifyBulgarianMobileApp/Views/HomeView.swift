@@ -4,7 +4,6 @@ struct HomeView: View {
     @State private var storeViewModel = StoreViewModel()
     @Bindable var cartViewModel: CartViewModel
     var onNavigateToTab: (Int) -> Void
-
     var body: some View {
         NavigationStack {
             ScrollView {
