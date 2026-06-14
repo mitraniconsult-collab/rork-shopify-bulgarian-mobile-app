@@ -5,16 +5,36 @@ on:
   workflow_dispatch:
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Select Xcode 15.4
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+      - name: Select Xcode 16.2
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
-      - name: Show available simulators
+      - name: Show available runtimes
         run: xcrun simctl list runtimes
+
+      - name: Install iOS 18 runtime
+        run: |
+          sudo xcodebuild -runFirstLaunch
+          xcrun simctl runtime add com.apple.CoreSimulator.SimRuntime.iOS-18-2 2>/dev/null || true
+          xcodebuild -downloadPlatform iOS -quiet 2>/dev/null || true
+          xcrun simctl list runtimes
+
+      - name: Create simulator
+        run: |
+          RUNTIME=$(xcrun simctl list runtimes | grep "iOS 18" | head -1 | grep -oE "com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]+" | head -1)
+          echo "Runtime: $RUNTIME"
+          if [ -z "$RUNTIME" ]; then
+            echo "No iOS 18 runtime found, trying available runtime"
+            RUNTIME=$(xcrun simctl list runtimes | grep -oE "com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]+" | head -1)
+            echo "Fallback runtime: $RUNTIME"
+          fi
+          DEVICE_ID=$(xcrun simctl create "BuildPhone" "iPhone 16" "$RUNTIME" 2>/dev/null || xcrun simctl create "BuildPhone" "iPhone 15" "$RUNTIME")
+          echo "DEVICE_ID=$DEVICE_ID" >> $GITHUB_ENV
+          xcrun simctl boot "$DEVICE_ID" || true
 
       - name: Build for simulator
         run: |
@@ -22,7 +42,7 @@ jobs:
             -project ios/ShopifyBulgarianMobileApp.xcodeproj \
             -scheme ShopifyBulgarianMobileApp \
             -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination "id=$DEVICE_ID" \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
