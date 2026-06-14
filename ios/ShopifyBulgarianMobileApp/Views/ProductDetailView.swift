@@ -350,13 +350,31 @@ struct ProductDetailView: View {
 
     // MARK: - Related Products
 
-    private func loadRelatedProducts() {
-        let allProducts = StoreViewModel.shared?.allProducts ?? []
-        relatedProducts = allProducts
-            .filter { $0.id != product.id }
-            .prefix(8)
-            .map { $0 }
+    private func relatedProductCard(_ product: ShopifyProduct) -> some View {
+    VStack(alignment: .leading, spacing: 6) {
+        AsyncImage(url: product.firstImage?.imageURL) { image in
+            image.resizable().aspectRatio(contentMode: .fill)
+        } placeholder: {
+            Color(.systemGray5)
+        }
+        .frame(width: 130, height: 130)
+        .clipped()
+        .clipShape(.rect(cornerRadius: 10))
+
+        Text(product.title)
+            .font(.system(size: 12))
+            .foregroundStyle(Color.primary)
+            .lineLimit(2)
+            .frame(width: 130, alignment: .leading)
+
+        if let price = product.priceRange?.safeMinPrice.formattedAmount {
+            Text(price)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Color(hex: "#FF6000"))
+        }
     }
+    .frame(width: 130)
+}
 
     private var relatedProductsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
