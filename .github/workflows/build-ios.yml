@@ -28,6 +28,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             SWIFT_SUPPRESS_WARNINGS=YES \
+            ENABLE_DEBUG_DYLIB=NO \
             build
 
       - name: Package .app for Appetize
