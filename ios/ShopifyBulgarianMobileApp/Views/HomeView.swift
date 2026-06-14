@@ -4,6 +4,7 @@ struct HomeView: View {
     @State private var storeViewModel = StoreViewModel()
     @Bindable var cartViewModel: CartViewModel
     var onNavigateToTab: (Int) -> Void
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -18,7 +19,7 @@ struct HomeView: View {
             .background(Color(.systemGray6))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text("Homesector")
+                    Text("HomeSector")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundStyle(Color.primary)
                 }
@@ -152,7 +153,7 @@ struct HomeView: View {
                     .font(.system(size: 17, weight: .semibold))
                 Spacer()
                 NavigationLink {
-                    CategoriesView(cartViewModel: cartViewModel)
+                    CategoriesView(cartViewModel: cartViewModel, showHome: .constant(false))
                 } label: {
                     Text("Виж всички")
                         .font(.system(size: 13))
@@ -215,10 +216,10 @@ struct HomeView: View {
 
     private var saleProducts: [ShopifyProduct] {
         storeViewModel.allProducts.filter { product in
-            guard let variant = product.variants.first,
+            guard let variant = product.variants?.edges.first?.node,
                   let compareAt = variant.compareAtPrice,
-                  let price = Double(variant.price),
-                  let compare = Double(compareAt) else { return false }
+                  let price = Double(variant.safePrice.safeAmount),
+                  let compare = Double(compareAt.safeAmount) else { return false }
             return compare > price
         }
     }
@@ -257,7 +258,7 @@ struct HomeView: View {
     private func saleProductCard(_ product: ShopifyProduct) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             ZStack(alignment: .topLeading) {
-                AsyncImage(url: URL(string: product.images.first?.url ?? "")) { image in
+                AsyncImage(url: product.firstImage?.imageURL) { image in
                     image.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Color(.systemGray5)
@@ -284,13 +285,13 @@ struct HomeView: View {
                 .lineLimit(2)
                 .frame(width: 140, alignment: .leading)
 
-            if let variant = product.variants.first {
+            if let variant = product.variants?.edges.first?.node {
                 HStack(spacing: 4) {
-                    Text("\(variant.price) лв.")
+                    Text(variant.safePrice.formattedAmount)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(Color.red)
                     if let compareAt = variant.compareAtPrice {
-                        Text("\(compareAt) лв.")
+                        Text(compareAt.formattedAmount)
                             .font(.system(size: 11))
                             .foregroundStyle(Color(.systemGray))
                             .strikethrough()
@@ -302,10 +303,10 @@ struct HomeView: View {
     }
 
     private func discountBadge(for product: ShopifyProduct) -> String? {
-        guard let variant = product.variants.first,
-              let price = Double(variant.price),
+        guard let variant = product.variants?.edges.first?.node,
               let compareAt = variant.compareAtPrice,
-              let compare = Double(compareAt),
+              let price = Double(variant.safePrice.safeAmount),
+              let compare = Double(compareAt.safeAmount),
               compare > price else { return nil }
         let pct = Int(((compare - price) / compare) * 100)
         return "-\(pct)%"
@@ -342,7 +343,7 @@ struct HomeView: View {
     private func topProductCard(_ product: ShopifyProduct) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             ZStack(alignment: .topTrailing) {
-                AsyncImage(url: URL(string: product.images.first?.url ?? "")) { image in
+                AsyncImage(url: product.firstImage?.imageURL) { image in
                     image.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Color(.systemGray5)
@@ -369,8 +370,8 @@ struct HomeView: View {
                 .lineLimit(2)
                 .frame(width: 130, alignment: .leading)
 
-            if let variant = product.variants.first {
-                Text("\(variant.price) лв.")
+            if let price = product.priceRange?.safeMinPrice.formattedAmount {
+                Text(price)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(Color(hex: "#FF6000"))
             }
@@ -468,7 +469,7 @@ struct HomeView: View {
                 .clipShape(.rect(cornerRadius: 4))
             Rectangle()
                 .fill(Color(.systemGray6))
-                .frame(height: 14, alignment: .leading)
+                .frame(height: 14)
                 .frame(maxWidth: 80)
                 .clipShape(.rect(cornerRadius: 4))
         }
