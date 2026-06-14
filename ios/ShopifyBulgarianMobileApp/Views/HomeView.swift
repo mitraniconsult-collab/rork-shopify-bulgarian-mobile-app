@@ -503,21 +503,3 @@ extension Color {
         )
     }
 }
-
-extension ShopifyProduct: Hashable {
-    nonisolated public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    nonisolated public static func == (lhs: ShopifyProduct, rhs: ShopifyProduct) -> Bool {
-        lhs.id == rhs.id
-    }
-}
-
-extension ShopifyCollection: Hashable {
-    nonisolated public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    nonisolated public static func == (lhs: ShopifyCollection, rhs: ShopifyCollection) -> Bool {
-        lhs.id == rhs.id
-    }
-}
